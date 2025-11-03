@@ -1,6 +1,7 @@
 import { fetchWeatherSummary } from '../utils/api.js';
 import { showToast } from '../components/toast.js';
 import { initPromoBanner } from '../components/promotionalBanner.js';
+import { getAuthState } from '../utils/state.js';
 
 export async function HomePage(){
   const tpl = document.getElementById('tpl-home');
@@ -17,10 +18,10 @@ export async function HomePage(){
       root.querySelector('[data-w-sugg]').textContent = w.suggestion;
       const future = root.querySelector('[data-w-future]');
       future.innerHTML = w.nextDays.map(d => `
-        <div class="chip" aria-label="${d.d} ${d.c}">
+        <div class="chip" aria-label="${d.d} ${d.condition || d.c}">
           <div style="font-weight:600">${d.d}</div>
           <div>${d.t}°C</div>
-          <div style="color:var(--color-muted)">${d.c}</div>
+          <div style="color:var(--color-muted)">${d.condition || d.c || 'Clear'}</div>
         </div>
       `).join('');
     }
@@ -60,6 +61,9 @@ export async function HomePage(){
   const wrapper = document.createElement('div');
   wrapper.appendChild(frag);
   
+  // Update buttons based on auth state
+  updateHomepageButtons(wrapper);
+  
   // Initialize promotional banner after DOM insertion
   setTimeout(() => {
     initPromoBanner();
@@ -71,6 +75,73 @@ export async function HomePage(){
   }, 150);
   
   return wrapper;
+}
+
+// Update homepage buttons based on authentication state
+function updateHomepageButtons(container) {
+  const authState = getAuthState();
+  const isLoggedIn = authState.isLoggedIn || false;
+  
+  // Update all hero slide buttons
+  const heroActions = container.querySelectorAll('.promo-hero-actions');
+  heroActions.forEach(actionContainer => {
+    const primaryBtn = actionContainer.querySelector('.btn.primary.large');
+    const hollowBtn = actionContainer.querySelector('.btn.hollow.large');
+    
+    if (primaryBtn && hollowBtn) {
+      if (isLoggedIn) {
+        // Logged in: "View Packages" - "View Calendar"
+        primaryBtn.textContent = 'View Packages';
+        primaryBtn.setAttribute('href', '#/packages');
+        hollowBtn.textContent = 'View Calendar';
+        hollowBtn.setAttribute('href', '#/weather');
+      } else {
+        // Not logged in: "Book Now" - "View Packages"
+        primaryBtn.textContent = 'Book Now';
+        primaryBtn.setAttribute('href', '#/packages');
+        hollowBtn.textContent = 'View Packages';
+        hollowBtn.setAttribute('href', '#/packages');
+      }
+    }
+  });
+  
+  // Update bottom CTA section buttons
+  const ctaSection = container.querySelector('#section-cta');
+  if (ctaSection) {
+    const ctaButtons = ctaSection.querySelectorAll('a.btn');
+    if (ctaButtons.length >= 2) {
+      const primaryCta = ctaButtons[0];
+      const hollowCta = ctaButtons[1];
+      
+      if (isLoggedIn) {
+        // Logged in: "View Packages" - "View Calendar"
+        primaryCta.textContent = 'View Packages';
+        primaryCta.setAttribute('href', '#/packages');
+        hollowCta.textContent = 'View Calendar';
+        hollowCta.setAttribute('href', '#/weather');
+      } else {
+        // Not logged in: "Book Now" - "View Packages"
+        primaryCta.textContent = 'Book Now';
+        primaryCta.setAttribute('href', '#/packages');
+        hollowCta.textContent = 'View Packages';
+        hollowCta.setAttribute('href', '#/packages');
+      }
+    }
+  }
+}
+
+// Export function to update buttons when auth state changes
+export function updateHomepageButtonsOnAuthChange() {
+  // Only update if we're on the homepage
+  const main = document.getElementById('main');
+  if (!main) return;
+  
+  const heroSection = main.querySelector('#section-promo-hero');
+  const ctaSection = main.querySelector('#section-cta');
+  
+  if (heroSection || ctaSection) {
+    updateHomepageButtons(main);
+  }
 }
 
 // Pool section scroll animation - resets on each view like gallery

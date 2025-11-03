@@ -1,6 +1,9 @@
 import { setAuthState } from '../utils/state.js';
 import { showToast } from '../components/toast.js';
 import { AuthManager } from '../utils/auth.js';
+import { supabase } from '../lib/supabaseClient.js';
+import { REDIRECT_URL, DEBUG_AUTH } from '../config/publicEnv.js';
+import { showOAuthHelpBanner } from '../components/loginHelpBanner.js';
 
 export async function AuthPage(){
   window.kinaLogin = async (e) => {
@@ -100,8 +103,37 @@ export async function AuthPage(){
     }
   };
 
-  window.kinaGoogleSignIn = () => {
-    showToast('Google Sign-In is only available for users who have already registered with their Gmail account.', 'info');
+  window.kinaGoogleSignIn = async () => {
+    try {
+      if (DEBUG_AUTH) {
+        console.log('[AuthDBG] Starting Google OAuth', {
+          origin: window.location.origin,
+          redirectTo: REDIRECT_URL
+        });
+      }
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: REDIRECT_URL }
+      });
+      if (error) throw error;
+      // Success → browser will navigate away
+    } catch (err) {
+      // Distinguish common telemetry blocks vs real start failures
+      console.error('[OAuth] Start failed. If you also see generate_204 or play.google.com/log blocked, those are harmless. Actual failure is above:', err);
+      showToast(
+        'Couldn’t start Google Sign-In. Please allow Google domains or temporarily disable blockers and try again.',
+        'error'
+      );
+      // Optional contextual banner (one-time)
+      showOAuthHelpBanner();
+      if (DEBUG_AUTH) {
+        console.log('[AuthDBG] Sign-in error details', {
+          message: err?.message,
+          name: err?.name,
+          stack: err?.stack
+        });
+      }
+    }
   };
 
   return `

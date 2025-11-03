@@ -1,6 +1,7 @@
 import { setAuthState } from '../utils/state.js';
 import { showToast } from '../components/toast.js';
 import { AuthManager } from '../utils/auth.js';
+import { validateRegister, validateField, firstErrorKey } from '../utils/validation/register.js';
 
 export async function RegisterPage(){
   // Enable scrolling for registration modal
@@ -96,28 +97,24 @@ export async function RegisterPage(){
     const cookiesAgreed = form.querySelector('input[name="cookiesAgreed"]').checked;
     const personalInfoAgreed = form.querySelector('input[name="personalInfoAgreed"]').checked;
     
-    // Validation
-    if(!firstName || !lastName || !email || !password || !confirmPassword){
-      showToast('All fields are required','error'); 
-      return; 
+    // Centralized validation
+    const values = { firstName, lastName, email, password, confirmPassword, termsAgreed, privacyAgreed, cookiesAgreed, personalInfoAgreed };
+    clearRegisterErrors(form);
+    const errors = validateRegister(values);
+    if (Object.keys(errors).length > 0) {
+      renderRegisterErrors(form, errors);
+      const key = firstErrorKey(errors);
+      if (key) {
+        const el = getRegisterField(form, key);
+        if (el) el.focus();
+      }
+      return;
     }
     
-    if(password !== confirmPassword){
-      showToast('Passwords do not match','error'); 
-      return; 
-    }
-    
-    if(password.length < 8){
-      showToast('Password must be at least 8 characters','error'); 
-      return; 
-    }
-    
-    if(!termsAgreed || !privacyAgreed || !cookiesAgreed || !personalInfoAgreed){
-      showToast('Please agree to all terms and conditions','error'); 
-      return; 
-    }
-    
-    // Use the auth manager for registration
+    // Disable submit while processing
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Creating Account...'; }
+
     const result = await window.kinaAuth.register({
       firstName,
       lastName,
@@ -134,8 +131,20 @@ export async function RegisterPage(){
         location.hash = returnParam || '#/';
       }, 1000);
     } else {
-      showToast(result.message, 'error');
+      // Map server error to field if provided
+      const serverErrors = {};
+      if (result.field) serverErrors[result.field] = result.message || 'Registration failed';
+      else serverErrors.form = result.message || 'Registration failed';
+      renderRegisterErrors(form, serverErrors);
+      if (result.field) {
+        const el = getRegisterField(form, result.field);
+        if (el) el.focus();
+      } else {
+        showToast(result.message, 'error');
+      }
     }
+
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Create Account'; }
   };
 
   window.kinaShowLogin = () => {
@@ -194,10 +203,12 @@ export async function RegisterPage(){
             <div>
               <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--color-text);">First Name <span style="color: red;">*</span></label>
               <input type="text" name="firstName" required placeholder="First name" style="width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #d1d5db; background: #f9fafb; transition: all 0.2s ease; font-size: 16px; outline: none;" onfocus="this.style.background='white'; this.style.borderColor='#38b6ff'; this.style.boxShadow='0 0 0 3px rgba(56, 182, 255, 0.1)'" onblur="this.style.background='#f9fafb'; this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
+              <div class="field-error" data-error-for="firstName" aria-live="polite" style="color:#dc2626; font-size:12px; margin-top:6px;"></div>
             </div>
             <div>
               <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--color-text);">Last Name <span style="color: red;">*</span></label>
               <input type="text" name="lastName" required placeholder="Last name" style="width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #d1d5db; background: #f9fafb; transition: all 0.2s ease; font-size: 16px; outline: none;" onfocus="this.style.background='white'; this.style.borderColor='#38b6ff'; this.style.boxShadow='0 0 0 3px rgba(56, 182, 255, 0.1)'" onblur="this.style.background='#f9fafb'; this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
+              <div class="field-error" data-error-for="lastName" aria-live="polite" style="color:#dc2626; font-size:12px; margin-top:6px;"></div>
             </div>
           </div>
           
@@ -206,6 +217,7 @@ export async function RegisterPage(){
             <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--color-text);">Email Address <span style="color: red;">*</span></label>
             <input type="email" name="email" required placeholder="Enter your email address" style="width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #d1d5db; background: #f9fafb; transition: all 0.2s ease; font-size: 16px; outline: none;" onfocus="this.style.background='white'; this.style.borderColor='#38b6ff'; this.style.boxShadow='0 0 0 3px rgba(56, 182, 255, 0.1)'" onblur="this.style.background='#f9fafb'; this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
             <small style="color: var(--color-muted); font-size: 12px; margin-top: 4px; display: block;">We'll send a verification email to this address</small>
+            <div class="field-error" data-error-for="email" aria-live="polite" style="color:#dc2626; font-size:12px; margin-top:6px;"></div>
           </div>
           
           <!-- Password Fields -->
@@ -216,6 +228,7 @@ export async function RegisterPage(){
               <button type="button" onclick="kinaTogglePassword('register-password')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #333; transition: color 0.2s ease;" onmouseover="this.style.color='#ffd21c'" onmouseout="this.style.color='#333'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
             </div>
             <small style="color: var(--color-muted); font-size: 12px; margin-top: 4px; display: block;">Must be at least 8 characters long</small>
+            <div class="field-error" data-error-for="password" aria-live="polite" style="color:#dc2626; font-size:12px; margin-top:6px;"></div>
           </div>
           
           <div>
@@ -224,6 +237,7 @@ export async function RegisterPage(){
               <input type="password" name="confirmPassword" id="register-confirm-password" required placeholder="Confirm your password" style="width: 100%; padding: 14px 50px 14px 16px; border-radius: 12px; border: 1px solid #d1d5db; background: #f9fafb; transition: all 0.2s ease; font-size: 16px; outline: none;" onfocus="this.style.background='white'; this.style.borderColor='#38b6ff'; this.style.boxShadow='0 0 0 3px rgba(56, 182, 255, 0.1)'" onblur="this.style.background='#f9fafb'; this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
               <button type="button" onclick="kinaTogglePassword('register-confirm-password')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #333; transition: color 0.2s ease;" onmouseover="this.style.color='#ffd21c'" onmouseout="this.style.color='#333'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
             </div>
+            <div class="field-error" data-error-for="confirmPassword" aria-live="polite" style="color:#dc2626; font-size:12px; margin-top:6px;"></div>
           </div>
           
           <!-- Agreement Checkboxes -->
@@ -265,6 +279,7 @@ export async function RegisterPage(){
                 I consent to the use of my personal information for account management and service delivery
               </label>
             </div>
+            <div class="field-error" data-error-for="agreements" aria-live="polite" style="color:#dc2626; font-size:12px; margin-top:6px;"></div>
           </div>
           
           <button type="submit" style="width: 100%; padding: 16px; background: #ffd21c; color: var(--color-text); border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='#e6c200'" onmouseout="this.style.background='#ffd21c'">Create Account</button>
@@ -377,4 +392,38 @@ export async function RegisterPage(){
       }
     }
   </style>`;
+}
+
+// Helpers for rendering errors
+function getRegisterField(form, key) {
+  switch (key) {
+    case 'firstName':
+    case 'lastName':
+    case 'email':
+    case 'password':
+    case 'confirmPassword':
+      return form.querySelector(`input[name="${key}"]`);
+    case 'agreements':
+      return form.querySelector('#termsAgreed') || form.querySelector('#privacyAgreed');
+    default:
+      return null;
+  }
+}
+
+function clearRegisterErrors(form) {
+  form.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+  form.querySelectorAll('input').forEach(input => input.removeAttribute('aria-invalid'));
+  const summary = form.querySelector('.form-error-summary');
+  if (summary) summary.remove();
+}
+
+function renderRegisterErrors(form, errors) {
+  // Field messages
+  Object.entries(errors).forEach(([key, msg]) => {
+    const errorEl = form.querySelector(`.field-error[data-error-for="${key}"]`);
+    if (errorEl) errorEl.textContent = msg;
+    const field = getRegisterField(form, key);
+    if (field) field.setAttribute('aria-invalid', 'true');
+  });
+  // No summary banner per UX feedback
 }

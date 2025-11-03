@@ -1,11 +1,15 @@
 // Profile Modal Component
-export function openProfileModal() {
+import { getAndMergeUserProfile } from './profileData.js';
+
+export async function openProfileModal() {
   const authUser = localStorage.getItem('auth_user');
   if (!authUser) {
     return;
   }
-  
-  const user = JSON.parse(authUser);
+  const stored = JSON.parse(authUser);
+  const user = await getAndMergeUserProfile(stored);
+  // Persist any merged fields for later use
+  try { localStorage.setItem('auth_user', JSON.stringify(user)); } catch {}
   
   const modal = document.createElement('div');
   modal.className = 'profile-modal-overlay';
@@ -16,13 +20,14 @@ export function openProfileModal() {
       <button class="profile-modal-close" onclick="closeProfileModal()">×</button>
       <div class="profile-modal-header">
         <div class="profile-avatar">
+          ${user.avatar_url ? `<img src="${user.avatar_url}" alt="Avatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />` : `
           <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
-          </svg>
+          </svg>`}
         </div>
-        <h2>${user.firstName} ${user.lastName}</h2>
-        <p class="profile-email">${user.email}</p>
+        <h2>${(user.firstName || 'Guest')} ${(user.lastName || '')}</h2>
+        <p class="profile-email">${user.email || ''}</p>
       </div>
       
       <div class="profile-modal-body">
@@ -30,7 +35,7 @@ export function openProfileModal() {
           <div class="profile-stat">
             <div class="profile-stat-icon">🏆</div>
             <div class="profile-stat-content">
-              <span class="profile-stat-value">${user.loyalty_points || 0}</span>
+              <span class="profile-stat-value">${user.loyalty_points || user.loyaltyPoints || 0}</span>
               <span class="profile-stat-label">Loyalty Points</span>
             </div>
           </div>
@@ -38,7 +43,7 @@ export function openProfileModal() {
           <div class="profile-stat">
             <div class="profile-stat-icon">📅</div>
             <div class="profile-stat-content">
-              <span class="profile-stat-value">${user.total_bookings || 0}</span>
+              <span class="profile-stat-value">${user.total_bookings || user.totalBookings || 0}</span>
               <span class="profile-stat-label">Total Bookings</span>
             </div>
           </div>

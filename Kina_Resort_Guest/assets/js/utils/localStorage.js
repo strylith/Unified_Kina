@@ -22,7 +22,7 @@ function initializePackages() {
       price: '₱1,500/night',
       capacity: 4,
       description: 'Comfortable rooms with air conditioning, family-sized bed and private bathroom. All 4 rooms are identically designed with modern amenities and stunning garden views.',
-      image_url: 'images/kina1.jpg',
+      image_url: 'images/KINA EDITED PICTURES/Standard_Room.png',
       created_at: new Date().toISOString()
     },
     {
@@ -73,7 +73,7 @@ function initializePackages() {
       price: '₱300',
       capacity: 8,
       description: 'Cozy cottage surrounded by tropical gardens, perfect for peaceful relaxation.',
-      image_url: 'images/cottage_2.JPG',
+      image_url: 'images/KINA EDITED PICTURES/Open_Cottage.png',
       created_at: new Date().toISOString()
     },
     {
@@ -83,7 +83,7 @@ function initializePackages() {
       price: '₱500',
       capacity: 8,
       description: 'A spacious, open-air cottage with tables and chairs, ideal for daytime relaxation, dining, and gatherings.',
-      image_url: 'images/kina1.jpg',
+      image_url: 'images/KINA EDITED PICTURES/Family_Cottage.png',
       created_at: new Date().toISOString()
     },
     // Function Halls
@@ -94,7 +94,7 @@ function initializePackages() {
       price: '₱10,000+',
       capacity: 100,
       description: 'Spacious hall perfect for weddings, conferences, and large events. Includes tables, chairs, sound system, and air conditioning.',
-      image_url: 'images/Function Hall.JPG',
+      image_url: 'images/KINA EDITED PICTURES/Function_Hall.png',
       created_at: new Date().toISOString()
     },
     {
@@ -104,7 +104,7 @@ function initializePackages() {
       price: '₱10,000+',
       capacity: 100,
       description: 'Cozy hall ideal for birthday parties, meetings, and gatherings. Perfect for smaller celebrations with modern amenities.',
-      image_url: 'images/Function Hall.JPG',
+      image_url: 'images/KINA EDITED PICTURES/Function_Hall.png',
       created_at: new Date().toISOString()
     }
   ];

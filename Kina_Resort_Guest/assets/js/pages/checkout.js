@@ -2,7 +2,7 @@ export async function CheckoutPage(){
   return `
     <section class=\"container\">
       <div class=\"section-head\"><h2>Checkout</h2></div>
-      <form class=\"form\" onsubmit=\"event.preventDefault();showToast('Payment successful (demo)', 'success');location.hash='#/rooms'\">
+      <form class=\"form\" onsubmit=\"event.preventDefault();showToast('Payment successful (demo)', 'success');location.hash='#/my-bookings'\">
         <div class=\"form-row\">
           <div style=\"min-width:260px\"><label>Full Name</label><input class=\"input\" required></div>
           <div style=\"min-width:260px\"><label>Email</label><input class=\"input\" type=\"email\" required></div>

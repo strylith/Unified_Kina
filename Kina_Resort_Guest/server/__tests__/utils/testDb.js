@@ -90,7 +90,7 @@ export async function createTestPackages(packages = []) {
     {
       title: 'Standard Room',
       category: 'rooms',
-      price: '₱5,500/night',
+      price: '₱1,500/night',
       capacity: 4,
       description: 'Comfortable room with air conditioning',
       image_url: 'images/room1.jpg'

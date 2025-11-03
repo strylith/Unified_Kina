@@ -1,4 +1,6 @@
 import { getApiBase, getMockBase, isProduction as isProdEnv, getRunMode } from './config.js';
+import { setAuthState } from './state.js';
+import { showToast } from '../components/toast.js';
 
 // Backend API configuration
 const isProduction = isProdEnv();
@@ -21,6 +23,43 @@ console.log('  MOCK_API_BASE:', MOCK_API_BASE);
 // Helper function to get auth token
 function getAuthToken() {
   return localStorage.getItem('auth_token');
+}
+
+// Handle 401 unauthorized responses
+function handleUnauthorized(errorMessage = 'Your session has expired. Please log in again.') {
+  console.warn('[Auth] Unauthorized access detected, clearing session');
+  
+  // Clear tokens and user data from localStorage
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('auth_user');
+  
+  // Update auth state to logged out
+  setAuthState({ isLoggedIn: false, user: null, role: 'guest' });
+  
+  // Get current page hash for return URL
+  const currentHash = window.location.hash || '#/packages';
+  const currentPath = currentHash.split('?')[0]; // Remove query params
+  
+  // Prevent redirect if already on auth/register pages to avoid loops
+  if (currentPath === '#/auth' || currentPath === '#/register' || currentPath === '#/forgot-password') {
+    console.log('[Auth] Already on auth page, not redirecting');
+    // Still show toast message
+    if (typeof showToast === 'function') {
+      showToast(errorMessage, 'error', 4000);
+    }
+    return;
+  }
+  
+  // Show user-friendly error message
+  if (typeof showToast === 'function') {
+    showToast(errorMessage, 'error', 4000);
+  }
+  
+  // Redirect to login with return URL
+  const returnUrl = encodeURIComponent(currentHash);
+  setTimeout(() => {
+    window.location.hash = `#/auth?return=${returnUrl}`;
+  }, 500); // Small delay to ensure toast is visible
 }
 
 // Helper function to make API requests
@@ -46,6 +85,39 @@ async function apiRequest(endpoint, options = {}) {
 
   try {
     const response = await fetch(fullUrl, config);
+    
+    // Check for 401 Unauthorized before parsing JSON
+    if (response.status === 401) {
+      let errorMessage = 'Your session has expired. Please log in again.';
+      
+      // Try to extract error message from response
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          // Provide user-friendly messages based on error type
+          const errorLower = errorData.error.toLowerCase();
+          if (errorLower.includes('expired')) {
+            errorMessage = 'Your session has expired. Please log in again.';
+          } else if (errorLower.includes('invalid') || errorLower.includes('token')) {
+            errorMessage = 'Invalid session. Please log in again.';
+          } else {
+            errorMessage = errorData.error;
+          }
+        }
+      } catch (parseError) {
+        // If JSON parsing fails, use default message
+        console.warn('[Auth] Could not parse 401 response:', parseError);
+      }
+      
+      // Handle unauthorized - this will clear tokens and redirect
+      handleUnauthorized(errorMessage);
+      
+      // Create error with preserved message for logging
+      const error = new Error(errorMessage);
+      error.isUnauthorized = true;
+      throw error;
+    }
+
     const data = await response.json();
 
     if (!response.ok) {
@@ -54,6 +126,11 @@ async function apiRequest(endpoint, options = {}) {
 
     return data;
   } catch (error) {
+    // If error is already handled (401 unauthorized), re-throw it
+    if (error.isUnauthorized) {
+      throw error;
+    }
+    
     console.error('API request error:', error);
     
     // Detect connection refused errors
@@ -71,24 +148,36 @@ export async function request(path, options = {}) {
   return apiRequest(path, options);
 }
 
-// Weather API (keeping mock for now)
+// Weather API - call backend weather summary with robust fallback
 export async function fetchWeatherSummary() {
-  await new Promise(res => setTimeout(res, 300));
+  try {
+    const timestamp = new Date().getTime();
+    const data = await apiRequest(`/weather/summary?t=${timestamp}`);
+    return data.data || data;
+  } catch (error) {
+    console.error('Weather fetch error:', error);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const fallbackForecast = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const dayOfWeek = weekdays[date.getDay()];
+      const month = monthNames[date.getMonth()];
+      const dayNum = date.getDate();
+      const dateLabel = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : `${month} ${dayNum}`;
+      fallbackForecast.push({ d: dayOfWeek, date: dateLabel, fullDate: date.toISOString().split('T')[0], t: 28, c: 'Clear', icon: '☀️' });
+    }
     return {
-      location: 'Kina Resort',
-      current: { tempC: 31, condition: 'Sunny', icon: '☀️' },
-      nextDays: [
-        { d: 'Mon', t: 30, c: 'Sunny' },
-        { d: 'Tue', t: 29, c: 'Cloudy' },
-        { d: 'Wed', t: 31, c: 'Sunny' },
-        { d: 'Thu', t: 31, c: 'Sunny' },
-        { d: 'Fri', t: 29, c: 'Partly Cloudy' },
-        { d: 'Sat', t: 30, c: 'Sunny' },
-        { d: 'Sun', t: 28, c: 'Showers' },
-      ],
-      suggestion: 'Best time to visit: sunny Fri–Mon afternoons.'
+      location: 'Caloocan, Philippines',
+      current: { tempC: 28, condition: 'Sunny', icon: '☀️', feelslike: 30, humidity: 65 },
+      nextDays: fallbackForecast,
+      suggestion: 'Perfect weather for outdoor activities!'
     };
   }
+}
 
 // Authentication API
 export async function login(email, password) {
@@ -107,7 +196,8 @@ export async function login(email, password) {
 }
 
 export async function register(userData) {
-  const data = await apiRequest('/auth/register', {
+  try {
+    const data = await apiRequest('/auth/register', {
     method: 'POST',
     body: JSON.stringify({
       email: userData.email,
@@ -115,15 +205,31 @@ export async function register(userData) {
       firstName: userData.firstName,
       lastName: userData.lastName
     })
-  });
-  
-  // Store token
-  if (data.token) {
-    localStorage.setItem('auth_token', data.token);
-    localStorage.setItem('auth_user', JSON.stringify(data.user));
+    });
+    
+    // Store token
+    if (data.token) {
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth_user', JSON.stringify(data.user));
+    }
+    
+    return data;
+  } catch (err) {
+    const message = String(err?.message || 'Registration failed');
+    // Basic mapping for common backend/auth provider messages
+    let field = null; let code = 'unknown_error';
+    const lower = message.toLowerCase();
+    if (lower.includes('email') && (lower.includes('already') || lower.includes('exists') || lower.includes('registered') || lower.includes('duplicate'))) {
+      field = 'email'; code = 'email_exists';
+    } else if (lower.includes('password') && lower.includes('least')) {
+      field = 'password'; code = 'weak_password';
+    } else if (lower.includes('email') && (lower.includes('invalid') || lower.includes('format'))) {
+      field = 'email'; code = 'invalid_email';
+    }
+    const error = new Error(message);
+    error.field = field; error.code = code;
+    throw error;
   }
-  
-  return data;
 }
 
 export async function logout() {
@@ -190,7 +296,7 @@ export async function fetchPackageAvailability(packageId, startDate, endDate) {
 }
 
 // Check booking availability (conditionally routed)
-export async function checkAvailability(packageId, checkIn, checkOut, category = null, excludeBookingId = null) {
+export async function checkAvailability(packageId, checkIn, checkOut, category = null, excludeBookingId = null, checkInTime = null, checkOutTime = null) {
   // Use localStorage in production
   if (USE_CLIENT_STORAGE) {
     console.log('[ClientStorage] Checking availability via localStorage...');
@@ -203,6 +309,8 @@ export async function checkAvailability(packageId, checkIn, checkOut, category =
   let queryParams = `checkIn=${checkIn}&checkOut=${checkOut}`;
   if (category) queryParams += `&category=${category}`;
   if (excludeBookingId) queryParams += `&excludeBookingId=${excludeBookingId}`;
+  if (checkInTime) queryParams += `&checkInTime=${checkInTime}`;
+  if (checkOutTime) queryParams += `&checkOutTime=${checkOutTime}`;
   
   // Use mock API in development mode
   if (USE_MOCK_BOOKINGS) {

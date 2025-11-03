@@ -7,9 +7,9 @@ import { normalizeDateInputToYMD } from '../utils/calendarUtils.js';
 
 export async function PackagesPage(){
   const data = [
-    { id:'lux-rooms', title:'Luxury Rooms', img:'images/kina1.jpg', price:'₱6,500+/night', desc:'Spacious rooms with ocean views, modern bath, and breakfast.' },
-    { id:'infinity-pool', title:'Infinity Pool Access', img:'images/kina2.jpg', price:'Included', desc:'Sweeping horizon pool perfect for sunny afternoons.' },
-    { id:'beach-cottages', title:'Beachfront Cottages', img:'images/kina3.jpg', price:'₱7,500+/night', desc:'Private veranda, direct beach access, ideal for couples.' },
+    { id:'lux-rooms', title:'Luxury Rooms', img:'images/kina1.jpg', price:'₱6,500+/night', desc:'Spacious rooms with garden views, modern bath, and breakfast.' },
+    { id:'infinity-pool', title:'Pool Access', img:'images/kina2.jpg', price:'Included', desc:'Spacious pool with long slide perfect for sunny afternoons.' },
+    { id:'beach-cottages', title:'Garden View Cottages', img:'images/kina3.jpg', price:'₱7,500+/night', desc:'Private veranda, surrounded by tropical gardens, ideal for couples.' },
     { id:'dining', title:'Gourmet Dining Options', img:'images/kina1.jpg', price:'Varies', desc:'Seafood-forward menus and tropical cocktails.' },
     { id:'water-sports', title:'Water Sports', img:'images/kina2.jpg', price:'₱800+/hour', desc:'Kayaks, paddleboards, and snorkeling gear.' },
     { id:'day-pass', title:'Day Pass', img:'images/kina3.jpg', price:'₱1,200', desc:'Pool + facilities access for day visitors.' },
@@ -28,8 +28,8 @@ export async function PackagesPage(){
         <p>${p.desc}</p>
         <small>💡 Perfect for clear weather days</small>
         <div class="package-cta">
-          <a class="btn primary" href="#/rooms">Book Now</a>
-          <a class="btn" href="#/rooms">Learn More</a>
+          <a class="btn primary" href="#/my-bookings">Book Now</a>
+          <a class="btn" href="#/my-bookings">Learn More</a>
         </div>
       </div>
     </article>`;
@@ -1071,7 +1071,7 @@ export function initLuxuryPackages() {
               return `
               <div class="room-selection-card" data-hall-id="${hall}" onclick="toggleHallSelection('${hall}')">
                 <div class="room-card-image">
-                  <img src="images/Function Hall.JPG" alt="${hall}">
+          <img src="images/KINA EDITED PICTURES/Function_Hall.png" alt="${hall}">
                   <div class="room-selection-indicator">
                     <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"><path d=\"M20 6L9 17l-5-5\"></path></svg>
                   </div>
@@ -1203,12 +1203,12 @@ function initializeCategorySection(sectionId, packages) {
   if (sectionId === 'rooms') {
     categoryData = {
       title: 'Standard Room',
-      price: '₱5,500/night',
+      price: '₱1,500/night',
       capacity: 4,
       availableCount: '4 rooms',
       description: 'Comfortable rooms with air conditioning, family-sized bed and private bathroom. All 4 rooms are identically designed with modern amenities and stunning garden views.',
       category: 'rooms',
-      image: 'images/kina1.jpg'
+      image: 'images/KINA EDITED PICTURES/Standard_Room.png'
     };
   } else if (sectionId === 'function-halls') {
     const hallCount = packages.length;
@@ -1222,7 +1222,7 @@ function initializeCategorySection(sectionId, packages) {
       availableCount: `${hallCount} halls`,
       description: 'Spacious function halls perfect for weddings, conferences, and large events. Includes tables, chairs, sound system, and air conditioning.',
       category: 'function-halls',
-      image: 'images/Function Hall.JPG'
+      image: 'images/KINA EDITED PICTURES/Function_Hall.png'
     };
   }
   
@@ -1301,18 +1301,30 @@ window.filterPackages = function() {
   
   sections.forEach(sectionId => {
     const section = document.getElementById(`${sectionId}-section`);
-    const card = section?.querySelector('.category-card');
+    const cards = section?.querySelectorAll('.category-card');
     
-    if (!card) return;
+    if (!cards || cards.length === 0) return;
     
-    const title = card.querySelector('.category-title')?.textContent.toLowerCase() || '';
-    const description = card.querySelector('.category-description')?.textContent.toLowerCase() || '';
-    const category = card.getAttribute('data-category') || '';
+    let sectionHasMatch = false;
     
-    const matchesSearch = !searchTerm || title.includes(searchTerm) || description.includes(searchTerm);
-    const matchesCategory = !categoryFilter || category === categoryFilter;
+    cards.forEach(card => {
+      const title = card.querySelector('.category-title')?.textContent.toLowerCase() || '';
+      const description = card.querySelector('.category-description')?.textContent.toLowerCase() || '';
+      const category = card.getAttribute('data-category') || '';
+      
+      const matchesSearch = !searchTerm || title.includes(searchTerm) || description.includes(searchTerm);
+      const matchesCategory = !categoryFilter || category === categoryFilter;
+      
+      if (matchesSearch && matchesCategory) {
+        card.style.display = 'flex';
+        sectionHasMatch = true;
+      } else {
+        card.style.display = 'none';
+      }
+    });
     
-    if (matchesSearch && matchesCategory) {
+    // Show/hide the section based on whether any card matches
+    if (sectionHasMatch) {
       section.style.display = 'block';
     } else {
       section.style.display = 'none';
@@ -1469,7 +1481,7 @@ function createRoomSelectionCard(roomId) {
   
   card.innerHTML = `
     <div class="room-card-image">
-      <img src="images/kina1.jpg" alt="${roomId}" loading="lazy">
+      <img src="images/KINA EDITED PICTURES/Standard_Room.png" alt="${roomId}" loading="lazy">
       <div class="room-selection-indicator">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
           <path d="M20 6L9 17l-5-5"></path>
@@ -1806,11 +1818,11 @@ function createCottageSelectionCard(cottageId) {
   let imageUrl = 'images/cottage_1.JPG';
   let price = '₱9,500/day';
   
-  if (cottageId.includes('Garden')) {
-    imageUrl = 'images/cottage_2.JPG';
+  if (cottageId.includes('Open')) {
+    imageUrl = 'images/KINA EDITED PICTURES/Open_Cottage.png';
     price = '₱7,500/day';
   } else if (cottageId.includes('Family')) {
-    imageUrl = 'images/kina1.jpg';
+    imageUrl = 'images/KINA EDITED PICTURES/Family_Cottage.png';
     price = '₱10,200/day';
   }
   

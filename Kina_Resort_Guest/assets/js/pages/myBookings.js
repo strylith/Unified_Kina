@@ -7,7 +7,7 @@ export async function MyBookingsPage() {
   const authState = getAuthState();
   
   if (!authState.isLoggedIn) {
-    location.hash = '#/auth?return=' + encodeURIComponent('#/rooms');
+    location.hash = '#/auth?return=' + encodeURIComponent('#/my-bookings');
     return '<div class="container"><p>Redirecting to login...</p></div>';
   }
 
@@ -639,7 +639,6 @@ export async function MyBookingsPage() {
     <section class="container my-bookings-page">
       <div class="bookings-header">
         <h2>My Bookings</h2>
-        <p class="user-welcome">Welcome back, ${userName}!</p>
         <div class="bookings-controls">
           <button class="btn primary" onclick="location.hash='#/packages'">Make a Booking</button>
         </div>
@@ -714,11 +713,6 @@ export async function MyBookingsPage() {
         font-weight: 700;
       }
 
-      .user-welcome {
-        color: var(--color-text-secondary);
-        margin: 0 0 20px 0;
-        font-size: 1.1rem;
-      }
 
       .bookings-controls {
         margin-top: 20px;

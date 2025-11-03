@@ -28,7 +28,7 @@ const mockReservationData = {
   'Ocean View Room': 12,
   'Deluxe Suite': 18,
   'Premium King': 20,
-  'Beachfront Cottage': 8,
+  'Standard Cottage': 8,
   'Garden View Cottage': 10,
   'Family Cottage': 14,
   'Grand Function Hall': 5,
@@ -861,14 +861,16 @@ function handleDateClick(dateString, status) {
       calendarState.selectedCheckin = dateString;
       console.log('[Calendar] Setting checkin:', dateString);
       // If checkout exists and is before new checkin, clear it (compare as strings)
-      if (calendarState.selectedCheckout && dateString >= calendarState.selectedCheckout) {
+      // Allow same-day bookings (dateString === checkoutDate), only clear if checkin is after checkout
+      if (calendarState.selectedCheckout && dateString > calendarState.selectedCheckout) {
         calendarState.selectedCheckout = null;
         console.log('[Calendar] Cleared checkout (before checkin)');
       }
     } else if (calendarState.modifyingDate === 'checkout') {
-      // Check if checkout is after checkin (compare as strings)
-      if (calendarState.selectedCheckin && dateString <= calendarState.selectedCheckin) {
-        alert('Check-out date must be after check-in date');
+      // Check if checkout is before checkin (compare as strings)
+      // Allow same-day bookings (dateString === checkinDate)
+      if (calendarState.selectedCheckin && dateString < calendarState.selectedCheckin) {
+        alert('Check-out date cannot be before check-in date');
         return;
       }
       calendarState.selectedCheckout = dateString;
@@ -902,15 +904,15 @@ function handleDateClick(dateString, status) {
       console.log('[Calendar] Setting checkin (step 1):', dateString);
       updateSelectionVisuals();
     } else {
-      // Second click - select check-out (compare as strings)
-      if (dateString > calendarState.selectedCheckin) {
+      // Second click - select check-out (allow same-day or later)
+      if (dateString >= calendarState.selectedCheckin) {
         calendarState.selectedCheckout = dateString;
         console.log('[Calendar] Setting checkout (step 2):', dateString);
         console.log('[Calendar] Final state:', { checkin: calendarState.selectedCheckin, checkout: calendarState.selectedCheckout });
         updateSelectionVisuals();
         // No automatic confirmation - user will click Confirm button when ready
       } else {
-        alert('Check-out date must be after check-in date');
+        alert('Check-out date cannot be before check-in date');
       }
     }
   } else {
@@ -1103,17 +1105,50 @@ async function confirmDateSelection() {
         try {
           const availabilityResult = await checkAvailability(1, newCheckin, newCheckout, 'rooms', calendarState.editBookingId);
           
+          console.log('[confirmDateSelection] Availability check result:', {
+            checkin: newCheckin,
+            checkout: newCheckout,
+            editBookingId: calendarState.editBookingId,
+            hasResult: !!availabilityResult,
+            dateAvailabilityKeys: availabilityResult?.dateAvailability ? Object.keys(availabilityResult.dateAvailability) : []
+          });
+          
           // Check each date in the range
+          // Use string-based date arithmetic to avoid timezone issues
           const unavailableRooms = [];
           const dateRange = [];
-          let currentDate = new Date(newCheckin + 'T00:00:00');
-          const endDate = new Date(newCheckout + 'T00:00:00');
           
-          while (currentDate < endDate) {
-            const dateStr = currentDate.toISOString().split('T')[0];
-            dateRange.push(dateStr);
-            currentDate.setDate(currentDate.getDate() + 1);
+          // Helper to increment YYYY-MM-DD date string by one day using local date components
+          const incrementDate = (dateStr) => {
+            const d = new Date(dateStr + 'T00:00:00');
+            d.setHours(0, 0, 0, 0); // Ensure local midnight
+            d.setDate(d.getDate() + 1); // Increment by one day
+            // Extract using local components (not UTC) to match backend formatDateToYMD
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          };
+          
+          // Generate date range: from checkin (inclusive) to checkout (exclusive)
+          // This matches backend logic: while (currentDate < checkOutDate)
+          let currentDateStr = newCheckin;
+          const endDateObj = new Date(newCheckout + 'T00:00:00');
+          endDateObj.setHours(0, 0, 0, 0);
+          
+          while (true) {
+            const currentDateObj = new Date(currentDateStr + 'T00:00:00');
+            currentDateObj.setHours(0, 0, 0, 0);
+            
+            if (currentDateObj >= endDateObj) {
+              break; // Reached or passed checkout date (exclusive)
+            }
+            
+            dateRange.push(currentDateStr);
+            currentDateStr = incrementDate(currentDateStr);
           }
+          
+          console.log('[confirmDateSelection] Generated date range:', dateRange);
           
           // Check if each room is available for all dates
           for (const room of editingRooms) {
@@ -1121,8 +1156,21 @@ async function confirmDateSelection() {
               const dayData = availabilityResult?.dateAvailability?.[dateStr];
               const availableRooms = dayData?.availableRooms || [];
               
+              console.log(`[confirmDateSelection] Checking ${room} on ${dateStr}:`, {
+                hasDayData: !!dayData,
+                availableRooms,
+                roomInAvailable: availableRooms.includes(room),
+                editBookingId: calendarState.editBookingId
+              });
+              
               if (!availableRooms.includes(room)) {
                 if (!unavailableRooms.some(ur => ur.room === room && ur.date === dateStr)) {
+                  console.warn(`[confirmDateSelection] ⚠️ Room ${room} not available on ${dateStr}`, {
+                    availableRooms,
+                    editingRoom: room,
+                    editBookingId: calendarState.editBookingId,
+                    dayDataKeys: dayData ? Object.keys(dayData) : []
+                  });
                   unavailableRooms.push({ room, date: dateStr });
                 }
               }
@@ -1130,6 +1178,7 @@ async function confirmDateSelection() {
           }
           
           if (unavailableRooms.length > 0) {
+            console.error('[confirmDateSelection] ❌ Room conflicts detected:', unavailableRooms);
             const conflicts = unavailableRooms.map(ur => `${ur.room} on ${ur.date}`).join('\n');
             alert(`Cannot change dates:\n\nThe following rooms are already booked:\n${conflicts}\n\nPlease select different dates or remove these rooms from your booking.`);
             return;
@@ -1286,6 +1335,9 @@ async function updateCalendarDisplay(year = null, month = null) {
       
       // Update button visibility after calendar renders
       updateCalendarButtons();
+      
+      // Re-initialize event delegation after calendar update
+      initializeCalendarEvents();
     } catch (error) {
       console.error('Error generating calendar:', error);
       const errorMessage = error.message.includes('backend server') 
@@ -1759,15 +1811,15 @@ export function openCalendarModal(packageTitle, reservationCount, packageCategor
           </div>
           ${packageCategory === 'rooms' ? `
           <div class="legend-item">
-            <div class="legend-color available-all"></div>
+            <div class="legend-color room-available-4"></div>
             <span>All Available</span>
           </div>
           <div class="legend-item">
-            <div class="legend-color available-2"></div>
+            <div class="legend-color room-available-2"></div>
             <span>Partial</span>
           </div>
           <div class="legend-item">
-            <div class="legend-color available-1"></div>
+            <div class="legend-color room-available-1"></div>
             <span>Limited</span>
           </div>
           <div class="legend-item">
@@ -2144,8 +2196,7 @@ function navigateMonth(direction) {
   monthNavigationTimer = setTimeout(() => {
     updateCalendarDisplay(newYear, newMonth).then(() => {
       calendarContainer.classList.remove('calendar-transitioning');
-      // Re-initialize event delegation after calendar update
-      initializeCalendarEvents();
+      // Events are automatically reinitialized by updateCalendarDisplay()
     });
     monthNavigationTimer = null;
   }, 150); // 150ms debounce for better UX

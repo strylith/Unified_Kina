@@ -86,7 +86,7 @@ export async function DashboardPage() {
     
     showToast('Searching for available rooms...', 'info');
     setTimeout(() => {
-      location.hash = '#/rooms';
+      location.hash = '#/my-bookings';
     }, 1000);
   };
 
@@ -197,15 +197,15 @@ export async function DashboardPage() {
         <div class="dashboard-card featured-rooms-card">
           <h3>Featured Rooms</h3>
           <div class="rooms-list">
-            <div class="room-item" onclick="location.hash='#/rooms'">
+            <div class="room-item" onclick="location.hash='#/my-bookings'">
               <h4>Deluxe Suite</h4>
               <p>From $299/night</p>
             </div>
-            <div class="room-item" onclick="location.hash='#/rooms'">
+            <div class="room-item" onclick="location.hash='#/my-bookings'">
               <h4>Ocean View</h4>
               <p>From $399/night</p>
             </div>
-            <div class="room-item" onclick="location.hash='#/rooms'">
+            <div class="room-item" onclick="location.hash='#/my-bookings'">
               <h4>Garden Villa</h4>
               <p>From $499/night</p>
             </div>

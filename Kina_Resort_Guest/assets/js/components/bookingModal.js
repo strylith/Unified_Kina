@@ -78,7 +78,7 @@ function resetBookingModalState() {
 
 // Room types for selection
 const roomTypes = ['Room 01', 'Room 02', 'Room 03', 'Room 04'];
-const cottageTypes = ['Beachfront Cottage', 'Garden View Cottage', 'Family Cottage'];
+const cottageTypes = ['Standard Cottage', 'Garden View Cottage', 'Family Cottage'];
 const functionHallTypes = ['Grand Function Hall', 'Intimate Function Hall'];
 
 // Mock reservation data for consistent availability
@@ -622,6 +622,20 @@ function renderRoomFields() {
           <label for="checkout-date" class="form-label">Check-out Date *</label>
           <input type="date" id="checkout-date" name="checkoutDate" class="form-input" readonly data-required="true">
           <div class="form-error" id="checkout-date-error"></div>
+        </div>
+      </div>
+      
+      <div class="date-time-group" style="margin-top: 16px;">
+        <div class="form-field">
+          <label for="checkin-time" class="form-label">Check-in Time</label>
+          <input type="time" id="checkin-time" name="checkinTime" class="form-input">
+          <div class="form-error" id="checkin-time-error"></div>
+        </div>
+        
+        <div class="form-field">
+          <label for="checkout-time" class="form-label">Check-out Time</label>
+          <input type="time" id="checkout-time" name="checkoutTime" class="form-input">
+          <div class="form-error" id="checkout-time-error"></div>
         </div>
       </div>
       
@@ -2231,9 +2245,20 @@ window.toggleAddCottage = function() {
   
   if (!field || !button) return;
   
-  const dates = bookingFormState.preFillDates || {};
-  const checkin = dates.checkin;
-  const checkout = dates.checkout;
+  // Read dates from form inputs first (source of truth after edits)
+  // Fallback to preFillDates only if form inputs are empty (initial state)
+  const checkinInput = document.getElementById('checkin-date');
+  const checkoutInput = document.getElementById('checkout-date');
+  
+  let checkin = checkinInput?.value?.trim() || null;
+  let checkout = checkoutInput?.value?.trim() || null;
+  
+  // Fallback to preFillDates if form inputs are empty (for initial state)
+  if (!checkin || !checkout) {
+    const dates = bookingFormState.preFillDates || {};
+    checkin = checkin || dates.checkin;
+    checkout = checkout || dates.checkout;
+  }
   
   if (field.style.display === 'none' || !field.style.display) {
     // EXPANDING - check if we have dates first
@@ -2284,16 +2309,32 @@ window.toggleAddCottage = function() {
 
 // New function to change/select cottage dates
 window.changeCottageDates = function() {
-  const dates = bookingFormState.preFillDates || {};
-  const checkin = dates.checkin;
-  const checkout = dates.checkout;
+  // Read dates from form inputs first (source of truth after edits)
+  // Fallback to preFillDates only if form inputs are empty (initial state)
+  const checkinInput = document.getElementById('checkin-date');
+  const checkoutInput = document.getElementById('checkout-date');
+  
+  let checkin = checkinInput?.value?.trim() || null;
+  let checkout = checkoutInput?.value?.trim() || null;
+  
+  // Fallback to preFillDates if form inputs are empty (for initial state)
+  if (!checkin || !checkout) {
+    const dates = bookingFormState.preFillDates || {};
+    checkin = checkin || dates.checkin;
+    checkout = checkout || dates.checkout;
+  }
   
   if (!checkin || !checkout) {
     alert('Please select check-in and check-out dates first for your room booking');
     return;
   }
   
-  console.log('[changeCottageDates] Opening cottage calendar with date constraints:', checkin, 'to', checkout);
+  console.log('[changeCottageDates] Opening cottage calendar with date constraints:', {
+    checkin,
+    checkout,
+    source: (checkinInput?.value || checkoutInput?.value) ? 'form-inputs' : 'preFillDates',
+    editBookingId: bookingFormState.bookingId
+  });
   
   // Open calendar modal with date constraints
   if (window.openCalendarModal) {
@@ -2808,10 +2849,38 @@ function initializeForm() {
       const checkin = new Date(checkinInput.value);
       const checkout = new Date(checkoutInput.value);
       
-      if (checkin && checkout && checkout > checkin) {
-        const diffTime = Math.abs(checkout - checkin);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        nightsDisplay.textContent = diffDays;
+      if (checkin && checkout) {
+        // Check if same-day booking
+        if (checkin.getTime() === checkout.getTime()) {
+          // Same-day booking - calculate hours instead of nights
+          const checkinTimeInput = document.getElementById('checkin-time');
+          const checkoutTimeInput = document.getElementById('checkout-time');
+          
+          if (checkinTimeInput?.value && checkoutTimeInput?.value) {
+            const checkinTime = checkinTimeInput.value;
+            const checkoutTime = checkoutTimeInput.value;
+            
+            if (checkoutTime > checkinTime) {
+              const [hour1, min1] = checkinTime.split(':').map(Number);
+              const [hour2, min2] = checkoutTime.split(':').map(Number);
+              const minutes1 = hour1 * 60 + min1;
+              const minutes2 = hour2 * 60 + min2;
+              const hours = (minutes2 - minutes1) / 60;
+              nightsDisplay.textContent = `${hours.toFixed(1)} hours`;
+            } else {
+              nightsDisplay.textContent = 'Same-day';
+            }
+          } else {
+            nightsDisplay.textContent = 'Same-day';
+          }
+        } else if (checkout > checkin) {
+          const diffTime = Math.abs(checkout - checkin);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          nightsDisplay.textContent = diffDays;
+        } else {
+          nightsDisplay.textContent = '0';
+        }
+        
         // Update room availability when dates change
         updateRoomAvailability();
       } else {
@@ -2821,6 +2890,16 @@ function initializeForm() {
     
     checkinInput.addEventListener('change', calculateNights);
     checkoutInput.addEventListener('change', calculateNights);
+    
+    // Also update when times change
+    const checkinTimeInput = document.getElementById('checkin-time');
+    const checkoutTimeInput = document.getElementById('checkout-time');
+    if (checkinTimeInput) {
+      checkinTimeInput.addEventListener('change', calculateNights);
+    }
+    if (checkoutTimeInput) {
+      checkoutTimeInput.addEventListener('change', calculateNights);
+    }
     
     // Calculate nights on initial load if dates are pre-filled
     if (checkinInput.value && checkoutInput.value) {
@@ -3220,9 +3299,9 @@ function validateField(field) {
   // Check-out date validation
   if (fieldName === 'checkoutDate' && value) {
     const checkinDate = document.getElementById('checkin-date')?.value;
-    if (checkinDate && value <= checkinDate) {
+    if (checkinDate && value < checkinDate) {
       isValid = false;
-      errorMessage = 'Check-out date must be after check-in date';
+      errorMessage = 'Check-out date cannot be before check-in date';
     }
   }
   
@@ -3234,6 +3313,43 @@ function validateField(field) {
     if (fieldName === 'endTime' && startTime && value <= startTime) {
       isValid = false;
       errorMessage = 'End time must be after start time';
+    }
+  }
+  
+  // Room time validation
+  if (field.type === 'time' && value && (fieldName === 'checkinTime' || fieldName === 'checkoutTime')) {
+    const checkinDate = document.getElementById('checkin-date')?.value;
+    const checkoutDate = document.getElementById('checkout-date')?.value;
+    
+    // Check if same-day booking
+    if (checkinDate && checkoutDate && checkinDate === checkoutDate) {
+      const checkinTime = document.getElementById('checkin-time')?.value;
+      const checkoutTime = document.getElementById('checkout-time')?.value;
+      
+      // Require both times for same-day bookings
+      if ((fieldName === 'checkinTime' && !checkoutTime) || (fieldName === 'checkoutTime' && !checkinTime)) {
+        // Wait for both to be filled before validating
+        return true;
+      }
+      
+      if (checkinTime && checkoutTime && checkoutTime <= checkinTime) {
+        isValid = false;
+        errorMessage = 'Check-out time must be after check-in time';
+      }
+      
+      // Minimum 2-hour duration for same-day bookings
+      if (checkinTime && checkoutTime && checkoutTime > checkinTime) {
+        const [hour1, min1] = checkinTime.split(':').map(Number);
+        const [hour2, min2] = checkoutTime.split(':').map(Number);
+        const minutes1 = hour1 * 60 + min1;
+        const minutes2 = hour2 * 60 + min2;
+        const hours = (minutes2 - minutes1) / 60;
+        
+        if (hours < 2) {
+          isValid = false;
+          errorMessage = 'Same-day bookings must be at least 2 hours';
+        }
+      }
     }
   }
   
@@ -3322,6 +3438,20 @@ function validateForm() {
   
   // Validate checkboxes/radio buttons
   if (bookingFormState.reservationType === 'room') {
+    // Validate same-day bookings require times
+    const checkinDate = document.getElementById('checkin-date')?.value;
+    const checkoutDate = document.getElementById('checkout-date')?.value;
+    if (checkinDate && checkoutDate && checkinDate === checkoutDate) {
+      const checkinTime = document.getElementById('checkin-time')?.value;
+      const checkoutTime = document.getElementById('checkout-time')?.value;
+      
+      if (!checkinTime || !checkoutTime) {
+        isValid = false;
+        showFieldError('checkin-time', 'Check-in and check-out times are required for same-day bookings');
+        showFieldError('checkout-time', 'Check-in and check-out times are required for same-day bookings');
+      }
+    }
+    
     // If rooms selected from flow, validate per-room guest counts against capacity
     if (bookingFormState.selectedRoomsFromFlow?.length > 0) {
       console.log('Rooms pre-selected from flow:', bookingFormState.selectedRoomsFromFlow);
@@ -3525,6 +3655,11 @@ async function saveBooking(bookingData) {
       category: category, // Store category in booking record
       cottageDates: bookingData.dates.cottageDates || [] // Array of individual dates for cottage rentals
     };
+    if (category === 'rooms') {
+      // Add room time fields for same-day bookings
+      if (bookingData.dates.checkinTime) bookingPayload.checkInTime = bookingData.dates.checkinTime;
+      if (bookingData.dates.checkoutTime) bookingPayload.checkOutTime = bookingData.dates.checkoutTime;
+    }
     if (category === 'cottages') {
       bookingPayload.usage_date = bookingData.dates.usage_date || bookingData.dates.date;
       bookingPayload.duration_type = bookingData.dates.duration_type || bookingData.dates.durationType;
@@ -3789,6 +3924,8 @@ window.submitBooking = async function(event) {
     bookingData.dates = {
       checkin: checkIn,
       checkout: checkOut,
+      checkinTime: formData.get('checkinTime'),
+      checkoutTime: formData.get('checkoutTime'),
       nights: document.getElementById('nights-display')?.textContent || '0'
     };
     
@@ -4325,13 +4462,58 @@ function showBookingSuccess(bookingData, savedBooking) {
         
         <div class="success-actions">
           <button class="btn primary" onclick="window.goToMyBookings()">View My Bookings</button>
-          <button class="btn" onclick="closeBookingModal()">Close</button>
+          <button class="btn" onclick="document.querySelector('.booking-success-modal')?.remove()">Close</button>
         </div>
       </div>
     </div>
   `;
   
   document.body.insertAdjacentHTML('beforeend', successHTML);
+  
+  // Enable middle mouse scrolling and click outside to close for booking success modal
+  setTimeout(() => {
+    const modal = document.querySelector('.booking-success-modal');
+    const content = modal?.querySelector('.success-content');
+    
+    if (modal && content) {
+      // Handle click outside to close
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+      
+      let lastY = 0;
+      let isScrolling = false;
+      
+      const mousedownHandler = (e) => {
+        if (e.button === 1) {
+          e.preventDefault();
+          isScrolling = true;
+          lastY = e.clientY;
+        }
+      };
+      
+      const mousemoveHandler = (e) => {
+        if (isScrolling && e.buttons === 4) {
+          e.preventDefault();
+          const deltaY = lastY - e.clientY;
+          content.scrollTop += deltaY * 2;
+          lastY = e.clientY;
+        }
+      };
+      
+      const mouseupHandler = (e) => {
+        if (e.button === 1) {
+          isScrolling = false;
+        }
+      };
+      
+      content.addEventListener('mousedown', mousedownHandler);
+      content.addEventListener('mousemove', mousemoveHandler);
+      document.addEventListener('mouseup', mouseupHandler);
+    }
+  }, 0);
   
   // Clear selections after successful booking
   console.log('[showBookingSuccess] Booking successful, clearing selections');

@@ -33,11 +33,37 @@ function formatDateToYMD(dateInput) {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Check if two time ranges overlap
+ * Used for same-day room bookings with time slots
+ * @param {string} start1 - Start time of first range (HH:MM format)
+ * @param {string} end1 - End time of first range (HH:MM format)
+ * @param {string} start2 - Start time of second range (HH:MM format)
+ * @param {string} end2 - End time of second range (HH:MM format)
+ * @returns {boolean} True if ranges overlap
+ */
+function doTimeRangesOverlap(start1, end1, start2, end2) {
+  if (!start1 || !end1 || !start2 || !end2) return true; // If times missing, consider as conflict (full day)
+  
+  const parseTime = (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes; // Convert to minutes since midnight
+  };
+  
+  const start1Min = parseTime(start1);
+  const end1Min = parseTime(end1);
+  const start2Min = parseTime(start2);
+  const end2Min = parseTime(end2);
+  
+  // Ranges overlap if: start1 < end2 AND start2 < end1
+  return start1Min < end2Min && start2Min < end1Min;
+}
+
 // GET /api/bookings/availability/:packageId - Check availability for date range (no auth required)
 router.get('/availability/:packageId', async (req, res) => {
   try {
     const { packageId } = req.params;
-    const { checkIn, checkOut, category, excludeBookingId } = req.query;
+    const { checkIn, checkOut, category, excludeBookingId, checkInTime, checkOutTime } = req.query;
 
     console.log(`[Availability] Request received for package ${packageId} from ${checkIn} to ${checkOut}, category: ${category || 'all'}`);
     console.log(`[Availability] 📅 Calendar Page Request: ${req.get('referer') || 'Unknown source'}`);
@@ -70,6 +96,8 @@ router.get('/availability/:packageId', async (req, res) => {
         item_id,
         item_type,
         usage_date,
+        check_in_time,
+        check_out_time,
         guest_name,
         adults,
         children,
@@ -361,6 +389,23 @@ router.get('/availability/:packageId', async (req, res) => {
 
             // Check if current date falls within booking range
             if (isDateBooked) {
+              // For same-day bookings with times, check for time overlap
+              const isRequestSameDay = checkInDate.getTime() === checkOutDate.getTime();
+              if (isSingleDayBooking && isRequestSameDay && checkInTime && checkOutTime) {
+                // Check time-based conflict for same-day bookings
+                const hasTimeConflict = doTimeRangesOverlap(
+                  checkInTime,
+                  checkOutTime,
+                  item.check_in_time,
+                  item.check_out_time
+                );
+                
+                if (!hasTimeConflict) {
+                  console.log(`[Availability] Same-day room ${item.item_id} on ${dateString} - no time conflict (existing: ${item.check_in_time}-${item.check_out_time}, requested: ${checkInTime}-${checkOutTime})`);
+                  return; // No conflict, skip this item
+                }
+              }
+              
               if (!bookedIds.includes(item.item_id)) {
                 bookedIds.push(item.item_id);
               }
@@ -636,6 +681,8 @@ router.post('/', async (req, res) => {
       specialRequests,
       selectedCottages,
       cottageDates, // Array of individual dates for cottage rentals
+      checkInTime, // Room check-in time (HH:MM format)
+      checkOutTime, // Room check-out time (HH:MM format)
       // Function hall fields (dev-friendly; ignored if not provided)
       hallId,
       hallName,
@@ -1055,7 +1102,9 @@ router.post('/', async (req, res) => {
         item_id: room.roomId, // e.g., "Room 01"
         guest_name: room.guestName,
         adults: room.adults,
-        children: room.children
+        children: room.children,
+        check_in_time: checkInTime || null,
+        check_out_time: checkOutTime || null
       }));
       
       console.log('[Booking] Creating room items:', JSON.stringify(roomItems, null, 2));
@@ -1286,6 +1335,8 @@ router.patch('/:id', async (req, res) => {
       specialRequests,
       selectedCottages,
       cottageDates,
+      checkInTime, // Room check-in time (HH:MM format)
+      checkOutTime, // Room check-out time (HH:MM format)
       // Function hall fields
       hallId,
       hallName,
@@ -1386,7 +1437,9 @@ router.patch('/:id', async (req, res) => {
           item_id: room.roomId,
           guest_name: room.guestName,
           adults: room.adults,
-          children: room.children
+          children: room.children,
+          check_in_time: checkInTime || null,
+          check_out_time: checkOutTime || null
         }));
         
         const { error: roomsError } = await db

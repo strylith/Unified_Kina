@@ -1,4 +1,8 @@
+import { getAuthState } from '../utils/state.js';
+
 export async function AboutPage() {
+  const authState = getAuthState();
+  
   return `
     <section class="about-hero">
       <div class="container">
@@ -19,20 +23,20 @@ export async function AboutPage() {
         
         <div class="about-features">
           <div class="feature-item">
-            <h3>🏖️ Beachfront Access</h3>
-            <p>Direct access to pristine beaches with crystal-clear waters</p>
+            <h3>🏊 Pool Access</h3>
+            <p>Relax and refresh in our spacious pool with long slide</p>
           </div>
           <div class="feature-item">
-            <h3>🏊 Infinity Pool</h3>
-            <p>Our signature infinity pool offers panoramic ocean views</p>
-          </div>
-          <div class="feature-item">
-            <h3>🏠 Beachfront Cottages</h3>
-            <p>Modern accommodations with direct beach access</p>
+            <h3>🏠 Garden View Cottages</h3>
+            <p>Modern accommodations surrounded by tropical greenery</p>
           </div>
           <div class="feature-item">
             <h3>🌴 Tropical Gardens</h3>
             <p>Lush native palms and tropical vegetation throughout</p>
+          </div>
+          <div class="feature-item">
+            <h3>🎉 Function Halls</h3>
+            <p>Perfect venues for events and celebrations up to 100 guests</p>
           </div>
         </div>
       </div>
@@ -58,7 +62,7 @@ export async function AboutPage() {
         <p>Ready to experience the magic of Kina Resort? We're here to help you plan the perfect tropical getaway.</p>
         
         <div class="cta-buttons">
-          <a class="btn primary" href="#/rooms">Book Your Stay</a>
+          ${!authState.isLoggedIn ? '<a class="btn primary" href="#/my-bookings">Book Your Stay</a>' : ''}
           <a class="btn hollow" href="#/packages">View Packages</a>
         </div>
       </div>
@@ -66,7 +70,7 @@ export async function AboutPage() {
 
     <style>
       .about-hero {
-        padding: 100px 20px 0px 20px;
+        padding: 70px 20px 0px 20px;
         text-align: center;
         background: white;
         padding-block: 0 !important;
@@ -200,7 +204,7 @@ export async function AboutPage() {
 
       @media (max-width: 768px) {
         .about-hero {
-          padding: 80px 15px 0px 15px;
+          padding: 70px 15px 0px 15px;
         }
 
         .about-content {

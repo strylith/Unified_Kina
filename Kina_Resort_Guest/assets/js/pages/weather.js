@@ -23,11 +23,48 @@ let calendarPageCache = {
 export async function WeatherPage(){
   try{
     const w = await fetchWeatherSummary();
-    const weekdays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    const next = (w.nextDays || []).slice(0,7);
-    const map = Object.fromEntries(next.map(d => [d.d, d]));
-    const seven = weekdays.map(lbl => map[lbl] || { d: lbl, t: '--', c: '—' });
-    const list = seven.map(d => `<li class="forecast-item">${d.d}: ${d.t}°C · ${d.c}</li>`).join('');
+    const PH_TZ_OFFSET = 8;
+    const now = new Date();
+    const phNow = new Date(now.getTime() + now.getTimezoneOffset()*60000 + PH_TZ_OFFSET*3600000);
+    const next = (w.nextDays || []).slice(0, Math.min((w.nextDays||[]).length, 5));
+
+    function formatPHLabel(day, index){
+      let phDate;
+      if (day.fullDate){
+        const [Y,M,D] = day.fullDate.split('-').map(Number);
+        phDate = new Date(Date.UTC(Y, M-1, D) + PH_TZ_OFFSET*3600000);
+      } else {
+        phDate = new Date(phNow.getTime() + index*86400000);
+        phDate.setHours(0,0,0,0);
+      }
+      const shortDay = phDate.toLocaleDateString('en-US', { weekday:'short' });
+      const shortDate = phDate.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+      const head = index===0 ? 'Today' : index===1 ? 'Tomorrow' : shortDay;
+      return { head, shortDate };
+    }
+
+    const chips = next.map((d, i) => {
+      const { head, shortDate } = formatPHLabel(d, i);
+      const temp = (d.t ?? d.temp ?? '--');
+      const cond = (d.condition || d.c || '');
+      const low = (d.tMin != null) ? `<div class="low">low ${d.tMin}°C</div>` : '';
+      const humidity = (d.humidity != null) ? `<div class="hum">humidity ${d.humidity}%</div>` : '';
+      return `
+        <div class="chip">
+          <div class="day">${head}, ${shortDate}</div>
+          <div class="temp">${temp}°C</div>
+          ${cond ? `<div class="condition">${cond}</div>` : ''}
+          ${low || humidity ? `<div class="meta" style="font-size:11px;color:var(--color-muted);display:flex;gap:6px;justify-content:center;">${low}${humidity}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    const list = next.map((d,i) => {
+      const { head, shortDate } = formatPHLabel(d,i);
+      const temp = (d.t ?? d.temp ?? '--');
+      const cond = (d.condition || d.c || '');
+      const suffix = cond ? ` · ${cond}` : '';
+      return `<li class="forecast-item">${head}, ${shortDate}: ${temp}°C${suffix}</li>`;
+    }).join('');
     
     return `
       <div class="header-spacer"></div>
@@ -41,25 +78,10 @@ export async function WeatherPage(){
               <div class="suggestion">💡 ${w.suggestion}</div>
             </div>
           </div>
-          <div class="future">
-            ${seven.map(d => `
-              <div class="chip">
-                <div class="day">${d.d}</div>
-                <div class="temp">${d.t}°C</div>
-                <div class="condition">${d.c}</div>
-              </div>
-            `).join('')}
-          </div>
+          <div class="future">${chips}</div>
         </div>
         
-        <div class="section-head">
-          <h2>7-Day Forecast</h2>
-          <p>Extended weather outlook for planning</p>
-        </div>
         
-        <div class="forecast-container">
-          <ul class="forecast-list">${list}</ul>
-        </div>
         
         <!-- Calendar Section with Filters -->
         <div class="section-head">
@@ -474,15 +496,15 @@ function updateCalendarLegend() {
         <span>Today</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color available-all"></div>
+        <div class="legend-color room-available-4"></div>
         <span>All Available</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color available-2"></div>
+        <div class="legend-color room-available-2"></div>
         <span>Partial</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color available-1"></div>
+        <div class="legend-color room-available-1"></div>
         <span>Limited</span>
       </div>
       <div class="legend-item">

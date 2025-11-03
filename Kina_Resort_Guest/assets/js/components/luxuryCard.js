@@ -172,7 +172,7 @@ export const allPackages = {
       discountText: '10% off for groups of 4+ guests'
     },
     {
-      image: 'images/cottage_2.JPG',
+      image: 'images/KINA EDITED PICTURES/Open_Cottage.png',
       title: 'Open Cottage',
       price: '₱300',
       capacity: 8,
@@ -182,7 +182,7 @@ export const allPackages = {
       discountText: '10% off for groups of 4+ guests'
     },
     {
-      image: 'images/kina1.jpg',
+      image: 'images/KINA EDITED PICTURES/Family_Cottage.png',
       title: 'Family Cottage',
       price: '₱500',
       capacity: 8,
@@ -194,7 +194,7 @@ export const allPackages = {
   ],
   rooms: [
     {
-      image: 'images/kina1.jpg',
+      image: 'images/KINA EDITED PICTURES/Standard_Room.png',
       title: 'Standard Room',
       price: '₱1,500/night',
       description: 'Comfortable rooms with air conditioning, family-sized bed and private bathroom. All 4 rooms are identically designed with modern amenities and stunning garden views.',
@@ -326,7 +326,7 @@ export const allPackages = {
   ],
   functionHalls: [
     {
-      image: 'images/Function Hall.JPG',
+      image: 'images/KINA EDITED PICTURES/Function_Hall.png',
       title: 'Grand Function Hall',
       price: '₱10,000+',
       description: 'Spacious hall perfect for weddings, conferences, and large events. Includes tables, chairs, sound system, and air conditioning.',
@@ -336,7 +336,7 @@ export const allPackages = {
       discountText: 'Special rates for multi-day bookings'
     },
     {
-      image: 'images/Function Hall.JPG',
+      image: 'images/KINA EDITED PICTURES/Function_Hall.png',
       title: 'Intimate Function Hall',
       price: '₱10,000+',
       description: 'Cozy hall ideal for birthday parties, meetings, and gatherings. Perfect for smaller celebrations with modern amenities.',

@@ -27,7 +27,7 @@
           <img
             src="images/kina-logo1.png"
             alt="Kina Resort logo"
-            style="height: 100px; width: auto"
+            style="height: 60px; width: auto"
           />
         </a>
         <button
@@ -39,12 +39,12 @@
           ☰
         </button>
         <ul id="primary-menu" class="menu" role="menubar">
-          <li role="none"><a role="menuitem" href="#/packages">Packages</a></li>
-          <li role="none"><a role="menuitem" href="#/rooms">My Bookings</a></li>
-          <li role="none"><a role="menuitem" href="#/weather">Weather</a></li>
-          <li role="none"><a role="menuitem" href="#/about">About</a></li>
+          <li role="none"><a role="menuitem" href="#/packages" data-nav="packages">Packages</a></li>
+          <li role="none"><a role="menuitem" href="#/my-bookings" data-nav="bookings" data-auth-required style="display: none;">Bookings</a></li>
+          <li role="none"><a role="menuitem" href="#/weather" data-nav="weather">Weather</a></li>
+          <li role="none"><a role="menuitem" href="#/about" data-nav="about">About</a></li>
           <li role="none">
-            <a role="menuitem" href="#/auth">Login</a>
+            <a role="menuitem" href="#/auth" class="account-btn" data-nav="account">Login</a>
           </li>
         </ul>
       </nav>
@@ -358,7 +358,7 @@
                   </div>
                 </div>
                 <div class="promo-hero-actions">
-                  <a class="btn primary large" href="#/rooms">Book Now</a>
+                  <a class="btn primary large" href="#/my-bookings">Book Now</a>
                   <a class="btn hollow large" href="#/weather">View Calendar</a>
                 </div>
               </div>
@@ -392,13 +392,13 @@
 
       <section id="section-pool">
         <div class="container">
-          <div class="section-head"><h2>Our Infinity Pool</h2></div>
+          <div class="section-head"><h2>Our Pool</h2></div>
         </div>
         <div class="pool-showcase">
           <div class="pool-hero" data-src="images/pool slide.JPG">
             <div class="pool-hero-overlay">
               <h3>Experience Paradise</h3>
-              <p>Infinity pool with breathtaking long slide</p>
+              <p>Pool with breathtaking long slide</p>
             </div>
           </div>
           
@@ -406,11 +406,11 @@
             <div class="pool-feature-card">
               <div class="pool-feature-icon">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M2 12h20M2 12l4-4m-4 4l4 4M22 12l-4-4m4 4l-4 4"></path>
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
                 </svg>
               </div>
-              <h4>Infinity Edge Design</h4>
-              <p>Stunning horizon views that blend seamlessly with the ocean</p>
+              <h4>Pool Playground</h4>
+              <p>Interactive water games, splash zones, and floating obstacles perfect for all ages</p>
             </div>
             
             <div class="pool-feature-card">
@@ -455,13 +455,9 @@
             <div class="feature-content">
               <h3>Pool Playground</h3>
               <p>
-                Wake up to ocean breezes and relaxing views. Our beachfront is
-                steps away from your room, designed for calm morning walks and
-                golden sunsets. Lorem ipsum dolor sit, amet consectetur
-                adipisicing elit. Illum cumque ullam commodi, eum architecto
-                laudantium, animi sed repudiandae obcaecati, mollitia iure nihil
-                tempora! Quaerat ad reiciendis sed autem, voluptatum
-                repudiandae.
+                Dive into endless fun at our Pool Playground! Featuring interactive water games, splash zones, 
+                and family-friendly activities perfect for kids and adults alike. Let loose with water slides, 
+                floating obstacles, and a safe swimming environment that makes every moment memorable.
               </p>
             </div>
           </article>

@@ -9,7 +9,6 @@ import { MyBookingsPage } from './pages/myBookings.js';
 import { AuthPage } from './pages/auth.js';
 import { RegisterPage } from './pages/register.js';
 import { ForgotPasswordPage } from './pages/forgotPassword.js';
-import { RoomsPage } from './pages/rooms.js';
 import { WeatherPage } from './pages/weather.js';
 import { CheckoutPage } from './pages/checkout.js';
 import { AboutPage } from './pages/about.js';
@@ -19,7 +18,6 @@ import { initSmoothScroll, destroySmoothScroll, scrollToTop } from './utils/smoo
 import { initHomepageScrollAnimations, cleanupScrollAnimations } from './utils/scrollAnimation.js';
 import './utils/auth.js'; // Initialize auth system
 import './components/aiChat.js'; // AI Chat functionality
-import { createDevAccountModal, shouldShowDevModal } from './components/devAccountModal.js';
 
 // Global variables for smooth scrolling and animations
 let lenisInstance = null;
@@ -28,7 +26,7 @@ let scrollAnimations = null;
 const routes = {
   '/': HomePage,
   '/packages': PackagesPage,
-  '/rooms': MyBookingsPage, // My Bookings page (with Re-Edit feature)
+  '/my-bookings': MyBookingsPage, // My Bookings page (with Re-Edit feature)
   '/auth': AuthPage,
   '/register': RegisterPage,
   '/forgot-password': ForgotPasswordPage,
@@ -143,13 +141,6 @@ async function router(){
 function onReady(){
   renderHeader();
   renderFooter();
-  
-  // Show dev account modal if in development
-  if (shouldShowDevModal()) {
-    setTimeout(() => {
-      createDevAccountModal();
-    }, 500); // Small delay for smoother UX
-  }
   
   // Make auth state globally available
   window.getAuthState = getAuthState;

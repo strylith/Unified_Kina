@@ -103,7 +103,7 @@ const packages = await createTestPackages([
   {
     title: 'Test Room',
     category: 'rooms',
-    price: '₱5,500/night',
+    price: '₱1,500/night',
     capacity: 4,
     description: 'Test room',
     image_url: 'images/test.jpg'

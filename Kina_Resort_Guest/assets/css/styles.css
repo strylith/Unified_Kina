@@ -198,12 +198,13 @@ html.lenis {
   background: #38b6ff; /* Changed: Blue shade to #38b6ff */
   backdrop-filter: blur(8px);
   border-bottom: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 .nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100px;
+  height: 70px;
 }
 .brand {
   font-weight: 700;
@@ -224,7 +225,7 @@ html.lenis {
 }
 .menu {
   display: flex;
-  gap: 20px;
+  gap: 15px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -232,47 +233,73 @@ html.lenis {
 .menu a {
   color: #ffffff;
   text-decoration: none;
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
   position: relative;
-  transition: transform var(--anim-duration) var(--anim-ease);
+  transition: all 0.3s ease-in-out;
 }
 .menu a::after {
   content: "";
   position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 6px;
-  height: 3px;
+  left: 12px;
+  right: 12px;
+  bottom: 4px;
+  height: 2px;
   background: linear-gradient(90deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
   border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(255, 215, 0, 0.4);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform var(--anim-duration) var(--anim-ease);
-  opacity: 0.7;
+  transition: transform 0.3s ease-in-out;
+  opacity: 0.9;
 }
 .menu a:hover::after {
   transform: scaleX(1);
 }
 .menu a:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Ensure enlarge effect applies specifically to primary menu anchors */
 #primary-menu a {
   display: inline-block;
   transform-origin: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
+  letter-spacing: 0.3px;
 }
 #primary-menu a:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 .menu a:hover,
 .menu a[aria-current="page"] {
   color: #ffffff;
-  background: transparent; /* remove hover background */
+}
+
+/* Account button yellow style - consistent for logged in/out */
+.menu .account-btn {
+  background: #ffd700 !important;
+  padding: 10px 18px;
+  border-radius: 12px;
+  color: #000 !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+  transition: all 0.3s ease-in-out;
+}
+
+.menu .account-btn:hover {
+  background: #ffed4e !important;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.menu .account-btn .user-name {
+  color: #000 !important;
+}
+
+.menu .account-btn svg {
+  stroke: #000 !important;
 }
 
 /* Footer */
@@ -1797,6 +1824,48 @@ label {
   }
 }
 
+/* Suggested Questions - Clean UI (AI Chat) */
+.ai-suggested-questions {
+  margin-top: 16px;
+  padding: 0;
+  background: transparent;
+}
+
+.suggested-questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggested-question-button {
+  width: 100%;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #18181b;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.suggested-question-button:hover {
+  background: var(--color-accent);
+  color: #ffffff;
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.suggested-question-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
 /* On small screens, maintain vertical stacking */
 @media (max-width: 480px) {
   .back-to-top {
@@ -1842,7 +1911,7 @@ label {
     position: absolute;
     left: 16px;
     right: 16px;
-    top: 80px;
+    top: 70px;
     flex-direction: column;
     background: #ffffff;
     padding: 12px;
@@ -1864,6 +1933,25 @@ label {
   }
   .menu a:hover {
     background-color: var(--color-bg);
+  }
+  
+  /* Adjust logo size on mobile */
+  .brand img {
+    height: 50px !important;
+  }
+  
+  /* Account button styling in mobile menu */
+  .menu .account-btn {
+    background: #ffd700 !important;
+    color: #000 !important;
+  }
+  
+  .menu .account-btn .user-name {
+    color: #000 !important;
+  }
+  
+  .menu .account-btn svg {
+    stroke: #000 !important;
   }
 }
 
@@ -2807,12 +2895,12 @@ html.lenis {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  font-size: clamp(14px, 2.5vw, 18px);
+  font-size: clamp(16px, 3vw, 22px);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 .welcome-overlay .h1 {
-  font-size: clamp(48px, 8vw, 72px);
+  font-size: clamp(56px, 10vw, 96px);
   line-height: 1.1;
   margin: 8px 0 0;
   color: white;
@@ -3280,11 +3368,11 @@ html.lenis {
   }
   
   .welcome-overlay .eyebrow {
-    font-size: clamp(12px, 2.5vw, 14px);
+    font-size: clamp(14px, 3vw, 18px);
   }
   
   .welcome-overlay .h1 {
-    font-size: clamp(36px, 9vw, 56px);
+    font-size: clamp(42px, 10vw, 70px);
   }
   
   .promo-hero-dots {
@@ -3346,7 +3434,7 @@ html.lenis {
 /* About page hero section */
 .about-hero {
   text-align: center;
-  padding: 100px 20px 30px 20px;
+  padding: 70px 20px 30px 20px;
   margin-bottom: 20px;
 }
 
@@ -3613,7 +3701,7 @@ html.lenis {
 /* Mobile responsive for about page */
 @media (max-width: 768px) {
   .about-hero {
-    padding: 80px 20px 30px 20px;
+    padding: 70px 20px 30px 20px;
     margin: 20px 0;
   }
 
@@ -3653,7 +3741,7 @@ html.lenis {
 
 /* Header spacer to prevent overlap with fixed header */
 .header-spacer {
-  height: 100px; /* Match exact header height */
+  height: 70px; /* Match exact header height */
   width: 100%;
 }
 
@@ -4420,16 +4508,6 @@ body.modal-open {
   transform: scale(1.05);
 }
 
-.calendar-date.today {
-  background: white;
-  color: var(--color-text);
-  border: 2px solid #38b6ff;
-  font-weight: 700;
-}
-
-.calendar-date.today:hover {
-  background: #f0f8ff;
-}
 
 .calendar-date.booked {
   background: #ffebee !important;
@@ -4538,25 +4616,37 @@ body.modal-open {
   border: 1px solid #ba68c8 !important;
 }
 
-/* Monochromatic room availability palette - light violet */
+/* Room availability colors matching legend */
 .calendar-date.room-available-4 {
-  background-color: #f3e5f5 !important;
+  background-color: #f3e5f5 !important; /* Purple - All available */
   color: #6a1b9a !important;
 }
 
 .calendar-date.room-available-3 {
-  background-color: #e1bee7 !important;
-  color: #6a1b9a !important;
+  background-color: #fff9c4 !important; /* Light yellow - Partial */
+  color: #f57f17 !important;
 }
 
 .calendar-date.room-available-2 {
-  background-color: #ce93d8 !important;
-  color: #6a1b9a !important;
+  background-color: #ffecb3 !important; /* Yellow - Partial */
+  color: #f57c00 !important;
 }
 
 .calendar-date.room-available-1 {
-  background-color: #ba68c8 !important;
-  color: #6a1b9a !important;
+  background-color: #ffe0b2 !important; /* Orange - Limited */
+  color: #ef6c00 !important;
+}
+
+.calendar-date.room-available-3:hover {
+  background: #fff59d !important;
+}
+
+.calendar-date.room-available-2:hover {
+  background: #ffe082 !important;
+}
+
+.calendar-date.room-available-1:hover {
+  background: #ffcc80 !important;
 }
 
 .calendar-date.booked-all,
@@ -4783,63 +4873,31 @@ body.modal-open {
   width: 16px;
   height: 16px;
   border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: none;
 }
 
-.legend-color.available {
-  background: #38b6ff;
-}
 
-.legend-color.today {
-  background: white;
-  border: 2px solid #38b6ff;
-}
-
-.legend-color.booked {
-  background: #ffc107;
-}
-
-.legend-color.maintenance {
-  background: #9e9e9e;
-}
-
-.legend-color.past {
-  background: #d6d6d6;
-}
-
-/* Room availability legend colors - light violet */
+/* Room availability legend colors matching calendar */
 .legend-color.room-available-4 {
-  background: #f3e5f5;
+  background: #f3e5f5; /* Purple - All available */
 }
 
 .legend-color.room-available-3 {
-  background: #e1bee7;
+  background: #fff9c4; /* Light yellow - Partial */
 }
 
 .legend-color.room-available-2 {
-  background: #ce93d8;
+  background: #ffecb3; /* Yellow - Partial */
 }
 
 .legend-color.room-available-1 {
-  background: #ba68c8;
+  background: #ffe0b2; /* Orange - Limited */
 }
 
 .legend-color.booked-all {
   background: #ef5350;
 }
 
-/* Partial availability legend colors */
-.legend-color.available-2 {
-  background: #ffecb3;
-}
-
-.legend-color.available-1 {
-  background: #ffe0b2;
-}
-
-.legend-color.available-all {
-  background: #f3e5f5;
-}
 
 /* Cottage availability legend colors */
 .legend-color.cottage-available {
@@ -5687,6 +5745,24 @@ input[type="date"][readonly]:hover {
   max-width: 500px;
   width: 100%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+.success-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.success-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.success-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .success-icon {
@@ -6325,277 +6401,6 @@ input[type="date"][readonly]:hover {
   }
 }
 
-/* Development Account Modal */
-.dev-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  padding: 20px;
-}
-
-.dev-modal-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 24px;
-  max-width: 900px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.dev-modal-header {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 30px;
-  text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.dev-modal-header h2 {
-  margin: 0 0 10px 0;
-  color: white;
-  font-size: 28px;
-}
-
-.dev-modal-header p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 16px;
-}
-
-.dev-modal-body {
-  padding: 30px;
-}
-
-.dev-accounts-section h3,
-.dev-create-section h3 {
-  color: white;
-  margin: 0 0 20px 0;
-  font-size: 18px;
-}
-
-.dev-accounts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.dev-account-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  padding: 20px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.dev-account-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.dev-account-icon {
-  font-size: 48px;
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-.dev-account-info h4 {
-  margin: 0 0 4px 0;
-  font-size: 18px;
-  color: #1a202c;
-}
-
-.dev-account-email {
-  color: #4a5568;
-  font-size: 13px;
-  margin: 0 0 4px 0;
-}
-
-.dev-account-password {
-  color: #2d3748;
-  font-size: 12px;
-  margin: 0 0 8px 0;
-  font-weight: 500;
-  font-family: monospace;
-  background: #f7fafc;
-  padding: 4px 8px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.dev-account-desc {
-  color: #718096;
-  font-size: 13px;
-  margin: 0 0 12px 0;
-}
-
-.dev-account-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.dev-account-badge.admin {
-  background: #fed7d7;
-  color: #c53030;
-}
-
-.dev-account-badge.customer {
-  background: #c6f6d5;
-  color: #2f855a;
-}
-
-.dev-select-btn {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, var(--color-accent) 0%, #2a9ce8 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.dev-select-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(56, 182, 255, 0.4);
-}
-
-.dev-divider {
-  text-align: center;
-  margin: 30px 0;
-  position: relative;
-}
-
-.dev-divider::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.dev-divider span {
-  background: #667eea;
-  color: white;
-  padding: 8px 20px;
-  border-radius: 20px;
-  position: relative;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.dev-create-section {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 24px;
-}
-
-.dev-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.dev-create-section input {
-  padding: 12px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.95);
-  transition: all 0.3s ease;
-}
-
-.dev-create-section input:focus {
-  outline: none;
-  border-color: white;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
-}
-
-.dev-create-btn {
-  width: 100%;
-  padding: 14px;
-  background: white;
-  color: #667eea;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 8px;
-}
-
-.dev-create-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
-}
-
-.dev-modal-footer {
-  padding: 20px 30px;
-  background: rgba(0, 0, 0, 0.2);
-  display: flex;
-  gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.dev-continue-guest,
-.dev-close-btn {
-  flex: 1;
-  padding: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.dev-continue-guest {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.dev-close-btn {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.dev-continue-guest:hover,
-.dev-close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: white;
-  color: white;
-}
-
-@media (max-width: 768px) {
-  .dev-accounts-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .dev-form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .dev-modal-footer {
-    flex-direction: column;
-  }
-}
-
 /* Profile Modal */
 .profile-modal-overlay {
   position: fixed;
@@ -6982,23 +6787,12 @@ input[type="date"][readonly]:hover {
   margin-top: 4px;
 }
 
-/* Calendar past date styling */
-.calendar-date.past {
-  background-color: #f5f5f5 !important;
-  color: #9e9e9e !important;
-  text-decoration: line-through;
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
 
 /* Calendar today styling */
 .calendar-date.today {
-  background-color: #fff3e0 !important;
-  color: #f57c00 !important;
   font-weight: bold;
-  border: 2px solid #f57c00;
   position: relative;
+  border: 2px solid #f57c00 !important;
 }
 
 .calendar-date.today::after {
@@ -7009,9 +6803,39 @@ input[type="date"][readonly]:hover {
   transform: translateX(-50%);
   font-size: 9px;
   font-weight: 600;
-  color: #f57c00;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  z-index: 3;
+  color: #f57c00;
+}
+
+.calendar-date.available-1.today::after,
+.calendar-date.available-2.today::after,
+.calendar-date.available-3.today::after,
+.calendar-date.room-available-1.today::after,
+.calendar-date.room-available-2.today::after,
+.calendar-date.room-available-3.today::after,
+.calendar-date.booked-all.today::after,
+.calendar-date.cottage-booked.today::after,
+.calendar-date.cottage-booked-all.today::after,
+.calendar-date.cottage-booked-partial.today::after,
+.calendar-date.function-hall-booked-all.today::after,
+.calendar-date.function-hall-booked-partial.today::after {
+  color: white;
+}
+
+.calendar-date.available-all.today::after,
+.calendar-date.room-available-4.today::after,
+.calendar-date.cottage-available.today::after,
+.calendar-date.function-hall-available.today::after {
+  color: #f57c00;
+}
+
+.calendar-date.room-available-2.today::after,
+.calendar-date.room-available-3.today::after,
+.calendar-date.cottage-partial.today::after,
+.calendar-date.function-hall-partial.today::after {
+  color: #f57c00;
 }
 
 /* Booked rooms label inside date cell (positioned above) - consolidated with above */
@@ -7033,19 +6857,17 @@ input[type="date"][readonly]:hover {
   flex-shrink: 0;
 }
 
-/* Simplify availability colors - just available vs booked */
+/* Available all and booked all states */
 .calendar-date.available-all,
-.calendar-date.room-available-1,
-.calendar-date.room-available-2,
-.calendar-date.room-available-3,
 .calendar-date.room-available-4 {
   background-color: #f3e5f5 !important;
   color: #6a1b9a !important;
 }
 
-.calendar-date.booked-all {
-  background-color: #ffebee !important;
-  color: #c62828 !important;
+.calendar-date.booked-all,
+.calendar-date.room-booked-0 {
+  background-color: #ef5350 !important;
+  color: white !important;
 }
 
 /* Legend colors for new styles */

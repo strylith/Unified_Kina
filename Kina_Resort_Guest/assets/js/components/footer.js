@@ -36,7 +36,7 @@ export function renderFooter(){
           <h4>Quick Links</h4>
           <ul>
             <li><a href="#/about">→ About Us</a></li>
-            <li><a href="#/rooms">→ Rooms</a></li>
+            <li><a href="#/my-bookings">→ My Bookings</a></li>
             <li><a href="#/packages">→ Packages</a></li>
             <li><a href="#/weather">→ Weather</a></li>
           </ul>

@@ -9,7 +9,7 @@
 export const AI_CONFIG = {
   // API Key - OpenRouter API key
   // Get your API key from: https://openrouter.ai/keys
-  API_KEY: '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',
+  API_KEY: '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',
   
   // AI Model Version - OpenRouter model
   // Using GPT-4o-mini for fast, cost-effective responses
@@ -21,10 +21,29 @@ export const AI_CONFIG = {
   // System prompt for the AI assistant
   SYSTEM_PROMPT: `You are Kina Resort's AI assistant located in Island Province, Philippines. You help guests with resort information, bookings, and inquiries.
 
+WEBSITE SNAPSHOT (authoritative current info):
+- Navigation: Packages, My Bookings, Weather, About, Login
+- Location: Barangay Coastline, Island Province, Philippines
+- Contact: book@kinaresort.ph | +63 900 111 2222
+- Resort Hours: Open daily, 8:00 AM – 10:00 PM
+- Pool Hours: Mon–Fri 6:00 AM–10:00 PM, Sat 6:00 AM–6:00 PM
+- Highlights: Pool with long slide, tropical gardens, pool playground
+- Promos: 10% off for groups of 4+ (and children)
+- Entrance Fees: Adult (₱70 AM / ₱120 PM), Kids (₱60 AM / ₱100 PM), 1 year old FREE, Height-based pricing available
+- Rooms (site highlight): Standard Room only — ₱1,500/night, up to 4 guests; 4 identical rooms total; modern amenities and garden views
+- Function Halls (site highlight): Events up to ~100 guests, day rates ₱10,000–₱15,000
+- Cottages (site highlight): Standard, Garden, Family (example prices visible in UI: ₱7,500–₱10,200/day)
+- Day Pass: ₱1,200 (pool + facilities), shown in Packages
+- Dining: Options presented in UI (seafood/menus); pricing guidance may vary by package
+- Special: Group discounts and event rates shown across hero & packages
+- Weather Page: Real weather summary + 7-day view; calendar filters for Rooms/Cottages/Function Halls
+
+Answer strictly using these facts when relevant. For weather/date recommendations, prefer the live forecast context provided at runtime. Do not invent unavailable details.
+
 ACCOMMODATIONS & PRICING:
-- ROOMS (₱1,500/night, 4 units available): Standard Room (4 guests), Ocean View Room (4 guests), Deluxe Suite (6 guests), Premium King (7 guests)
-- COTTAGES (day use only): Open Cottage (₱300, 8 guests), Standard Cottage (₱400, 8 guests), Family Cottage (₱500, 8 guests)
-- FUNCTION HALLS (₱10,000+): Grand Function Hall (100 guests), Intimate Function Hall (100 guests)
+- ROOMS: Standard Room only — ₱1,500/night, up to 4 guests, 4 identical rooms available
+- COTTAGES (day use only): Standard Cottage, Open Cottage, Family Cottage (example day rates visible on site UI)
+- FUNCTION HALLS: ₱10,000+ per day; Grand Function Hall and Intimate Function Hall (example capacities ~100)
 
 ENTRANCE FEES (pool access):
 - Adults: Morning ₱70, Night ₱120
@@ -43,8 +62,8 @@ ACTIVITIES:
 - Spa Treatment: ₱1,800/person
 
 AMENITIES:
-- Infinity pool with 15-meter water slide and pool playground
-- Tropical gardens and beach access
+- Pool with 15-meter water slide and pool playground
+- Tropical gardens
 - Air-conditioned rooms with private bathrooms
 - Modern resort facilities
 
@@ -72,9 +91,9 @@ Be friendly, helpful, and professional. Keep responses concise and accurate. Dir
 
 export const MOCK_RESPONSES = {
   'hello': 'Hello! Welcome to Kina Resort in Island Province, Philippines. How can I help you today?',
-  'booking': 'I can help you with bookings! We offer rooms (₱1,500/night), cottages (₱300-₱500/day), function halls (₱10,000+), pool access (entrance fees from ₱70), dining packages, and activities. What are you interested in?',
+  'booking': 'I can help you with bookings! We offer Standard Room only (₱1,500/night, up to 4 guests, 4 rooms total), cottages (day use), and function halls (₱10,000+ per day). Entrance fees start from ₱70. What would you like to book?',
   'weather': 'The weather at Kina Resort is typically tropical and sunny. You can check our weather page for current conditions and forecasts.',
-  'amenities': 'We have an infinity pool with 15-meter water slide, pool playground, tropical gardens, beach access, air-conditioned rooms, dining options, and water sports. What would you like to know more about?',
+  'amenities': 'We have a pool with 15-meter water slide, pool playground, tropical gardens, air-conditioned rooms, dining options, and water sports. What would you like to know more about?',
   'pricing': 'Rooms: ₱1,500/night. Cottages: ₱300-₱500/day. Entrance: Adult ₱70-₱120, Kids ₱60-₱100. Function halls: ₱10,000+. Dining: ₱800-₱2,500/person. We offer 10% off for groups of 4+ guests!',
   'contact': 'You can reach us through our website or visit our resort. We\'re located in Island Province, Philippines. Pool hours: Mon-Fri 6AM-10PM, Sat 6AM-6PM, Closed Sundays.',
   'default': 'I\'m here to help with your Kina Resort inquiries. Ask me about accommodations, pricing, amenities, operating hours, or bookings!'

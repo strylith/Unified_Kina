@@ -8,6 +8,7 @@ import packagesRoutes from './routes/packages.js';
 import bookingsRoutes from './routes/bookings.js';
 import usersRoutes from './routes/users.js';
 import settingsRoutes from './routes/settings.js';
+import weatherRoutes from './routes/weather.js';
 
 dotenv.config();
 
@@ -94,6 +95,7 @@ app.use('/api/packages', packagesRoutes);
 app.use('/api/bookings', bookingsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/weather', weatherRoutes);
 
 // API root health/index endpoint
 app.get('/api', (req, res) => {

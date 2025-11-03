@@ -17,7 +17,7 @@ describe('Packages Routes', () => {
       {
         title: 'Standard Room',
         category: 'rooms',
-        price: '₱5,500/night',
+        price: '₱1,500/night',
         capacity: 4,
         description: 'Comfortable room',
         image_url: 'images/room1.jpg'

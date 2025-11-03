@@ -34,22 +34,24 @@ export async function generateCalendarHTML(year, month, packageTitle, packageId,
   const isPageView = isPageViewOrCallback === true || (typeof isPageViewOrCallback === 'boolean' && isPageViewOrCallback);
   
   // Use appropriate navigation handlers based on context
-  const navHandlerPrefix = isPageView ? 'window.calendarPage.' : '';
+  const navigateMonthFunc = isPageView ? 'window.calendarPageNavigateMonth' : 'navigateMonth';
+  const changeMonthFunc = isPageView ? 'window.calendarPageChangeMonth' : 'changeMonth';
+  const changeYearFunc = isPageView ? 'window.calendarPageChangeYear' : 'changeYear';
   
   let calendarHTML = `
     <div class="calendar-header">
-      <button class="calendar-nav-btn" onclick="${navHandlerPrefix}navigateMonth(-1)" ${year <= currentYear && month <= currentMonth ? 'disabled' : ''}>
+      <button class="calendar-nav-btn" onclick="${navigateMonthFunc}(-1)" ${year <= currentYear && month <= currentMonth ? 'disabled' : ''}>
         <span>‹</span>
       </button>
       <div class="calendar-month-year">
-        <select class="calendar-month-select" onchange="${navHandlerPrefix}changeMonth(this.value)">
+        <select class="calendar-month-select" onchange="${changeMonthFunc}(this.value)">
           ${generateMonthOptions(month)}
         </select>
-        <select class="calendar-year-select" onchange="${navHandlerPrefix}changeYear(this.value)">
+        <select class="calendar-year-select" onchange="${changeYearFunc}(this.value)">
           ${generateYearOptions(year, currentYear, maxYear)}
         </select>
       </div>
-      <button class="calendar-nav-btn" onclick="${navHandlerPrefix}navigateMonth(1)" ${year >= maxYear && month >= maxMonth ? 'disabled' : ''}>
+      <button class="calendar-nav-btn" onclick="${navigateMonthFunc}(1)" ${year >= maxYear && month >= maxMonth ? 'disabled' : ''}>
         <span>›</span>
       </button>
     </div>
@@ -248,15 +250,19 @@ export async function generateCalendarHTML(year, month, packageTitle, packageId,
       }
     }
     
-    // Override status for past dates, constrained dates, and today
+    // Override status for past dates and constrained dates
+    // Note: For "today", we keep the original status and add the "today" class separately
     let finalStatusType = statusType;
     if (isPast) {
       finalStatusType = 'past';
     } else if (isOutsideConstraints) {
       finalStatusType = 'constrained';
       additionalClasses += ' constrained';
-    } else if (isToday) {
-      finalStatusType = 'today';
+    }
+    
+    // Add "today" class separately so it doesn't override availability status
+    if (isToday) {
+      additionalClasses += ' today';
     }
     
     // For page view, we don't show selection highlights (that's for modal only)
