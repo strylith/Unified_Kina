@@ -1,0 +1,16 @@
+-- Migration: Add booking_time field to bookings table
+-- This allows users to enter booking time in any format they prefer
+
+-- Create kina schema if it doesn't exist
+CREATE SCHEMA IF NOT EXISTS kina;
+
+-- Set search path to kina schema
+SET search_path TO kina, public;
+
+-- Add booking_time column if it doesn't exist
+ALTER TABLE kina.bookings
+ADD COLUMN IF NOT EXISTS booking_time TEXT;
+
+-- Optional: Add a comment to explain the field
+COMMENT ON COLUMN kina.bookings.booking_time IS 'User-entered booking time in any format (e.g., "9:00 AM - 5:00 PM", "9am to 5pm")';
+

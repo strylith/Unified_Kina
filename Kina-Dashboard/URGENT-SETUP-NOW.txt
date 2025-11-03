@@ -1,0 +1,67 @@
+╔══════════════════════════════════════════════════════════╗
+║     ⚠️  URGENT: DATABASE SETUP REQUIRED  ⚠️              ║
+╚══════════════════════════════════════════════════════════╝
+
+YOUR ISSUE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The Supabase database tables are missing!
+
+
+IMMEDIATE SOLUTION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open your browser
+2. Go to: https://supabase.com/dashboard
+3. Select your project: ghwsczymlmgzfwnuzkuc
+4. Click "SQL Editor" (left sidebar)
+5. Click "New Query"
+6. Open file: RUN-THIS-SQL.sql
+7. Copy ALL the contents
+8. Paste into Supabase SQL Editor
+9. Click "Run" button
+10. Wait for "Success" message
+
+That's it! Takes 30 seconds.
+
+
+VERIFY IT WORKED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. In Supabase Dashboard, click "Table Editor" (left sidebar)
+2. You should see these tables:
+   ✅ users
+   ✅ bookings
+   ✅ audit_logs
+   ✅ email_logs
+   ✅ rooms
+   ✅ password_reset_otps
+
+
+TEST YOUR LOGIN:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Restart your server: Press Ctrl+C then "npm run dev"
+2. Open: http://localhost:5000/login.html
+3. Select "Admin"
+4. Login with:
+   Email: admin@kinaresort.com
+   Password: password123
+
+
+IF IT STILL DOESN'T WORK:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Check server logs - should now say:
+✅ Supabase connection successful
+
+NOT this:
+❌ Supabase connection FAILED
+
+
+══════════════════════════════════════════════════════════
+
+This is a one-time setup. After running the SQL, everything
+will work automatically!
+
+══════════════════════════════════════════════════════════
+
